@@ -22,3 +22,12 @@ doc_census/.estat_appid
 # doc_census keeps its census cache in-repo (the global *.rds rule above is for
 # Stan fits). It is ~35 KB and makes the pipeline runnable without an API key.
 !doc_census/data_raw/*.rds
+
+# Raw e-Stat downloads (rebuilt by R/build_jumin_age.R from the manifest)
+dt/raw/*
+!dt/raw/jumin_age/
+dt/raw/jumin_age/*
+!dt/raw/jumin_age/manifest.csv
+
+# Office lock files
+~$*
