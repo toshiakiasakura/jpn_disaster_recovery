@@ -1,0 +1,56 @@
+{
+    "name": "Disaster_recovery",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+    "mounts": [
+        "source=${localWorkspaceFolder},target=/workdir,type=bind,consistency=cached",
+        "source=disaster-recovery-claude-config,target=/home/jovyan/.claude,type=volume"
+    ],
+    "forwardPorts": [
+        8888 // Port for Jupyter Notebook
+    ],
+    "remoteUser": "jovyan",
+    "workspaceFolder": "/workdir",
+    "shutdownAction": "stopContainer",
+    "containerEnv": {
+        "CLAUDE_CONFIG_DIR": "/workdir/.claude"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-toolsai.jupyter",
+                "donjayamanne.vscode-jupytext",
+                "REditorSupport.r",
+                "RDebugger.r-debugger",
+                "ms-python.python",
+                "znck.grammarly",
+                "janisdd.vscode-edit-csv",
+                "GitHub.copilot",
+                "Gruntfuggly.todo-tree",
+                "ms-azuretools.vscode-docker",
+                "anthropic.claude-code"
+            ],
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "workbench.editorAssociations": {
+                    "*.ipynb": "jupyter-notebook"
+                },
+                "jupyter.jupyterServerType": "local", // Ensures Jupyter uses local server
+
+                // R / R Markdown. The conda R is the only one in the image, and
+                // pandoc is already on PATH next to it, so RSTUDIO_PANDOC is not
+                // needed. Knitting through rmarkdown::render keeps the Knit
+                // button and a command-line render on the same code path.
+                "r.rterm.linux": "/opt/conda/bin/R",
+                "r.rpath.linux": "/opt/conda/bin/R",
+                "r.bracketedPaste": true,
+                "r.sessionWatcher": true,
+                "r.alwaysUseActiveTerminal": true,
+                "r.rmarkdown.knit.useBackgroundProcess": true,
+                "r.rmarkdown.knit.command": "rmarkdown::render"
+            }
+        }
+    }
+}
