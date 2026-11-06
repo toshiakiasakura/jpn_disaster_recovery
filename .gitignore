@@ -1,0 +1,24 @@
+# Project related
+Manifest.toml
+.memsearch
+CLAUDE.md
+.claude
+.DS_Store
+man
+
+# Output directories
+res_ccdf_plot
+res_fit_params
+output
+
+# Intermediate files.
+*.rds
+wave*
+*.html
+
+# e-Stat API credential (doc_census)
+doc_census/.estat_appid
+
+# doc_census keeps its census cache in-repo (the global *.rds rule above is for
+# Stan fits). It is ~35 KB and makes the pipeline runnable without an API key.
+!doc_census/data_raw/*.rds
