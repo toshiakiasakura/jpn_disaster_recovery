@@ -158,4 +158,5 @@ Rscript src/build_natpop.R
 | `src/2r_age_groups.ipynb` | `jumin_age_sex_5yr_long.qs2`, workbook sheet `1_市町村一覧` |
 | `src/4r_residual_migration.ipynb` | `jumin_age_sex_5yr_long.qs2` (`japanese`), `deaths_age_sex_5yr_long.qs2`, `natpop_japanese_single_year.csv`, `idou_age_sex_5yr_long.qs2` (validation), workbook sheet `1_市町村一覧` |
 | `src/5r_ungroup2d.ipynb` | as 4r (reads its 1D cache `output/4r_pclm_cache.qs2`), plus 2D population fits cached in `output/5r_pclm2d_cache.qs2` |
+| `src/6r_no_offset.ipynb` | as 5r (reads the 4r and 5r caches); no-offset 1D and 2D population fits cached in `output/6r_pclm_plain_cache.qs2` |
 | `src/3r_migration_kumamoto.ipynb` | `idou_age_sex_5yr_long.qs2` (Japanese movers), `jumin_age_sex_5yr_long.qs2` (`japanese` basis), workbook sheet `1_市町村一覧` |

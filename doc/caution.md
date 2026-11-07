@@ -110,6 +110,15 @@ Things to keep in mind when using the population data in `dt/` and when reading 
   - Fitting without the offset is slow: 43 minutes for 45 municipalities (cached).
 - **Figures 9–10 (what the fits look like):** with the national shape, the 1947 and 1966 cliffs appear and age along cohort diagonals; without it they are smoothed. In very small municipalities (五木村, about 60 people per band), the single-year values are nearly flat within each band, so they form steps.
 
+### Without the national offset (`src/6r_no_offset.ipynb`)
+
+- **Setup:** reruns 5r figures 1–7 with the population split by plain `pclm` (1D) and plain `pclm2D` (2D), using no national single-year shape. Figures 1–3 compare all four splits (1D/2D × with/without offset).
+- **Ages 0–39:** essentially unchanged. The noise SD is 4–11 per 1,000 at ages 20–39 in every variant, and the quake signals are the same.
+- **Ages 55–79:** the noise roughly doubles to triples (e.g. 熊本市 6.3 → 21.5 per 1,000). A ±60–90 per 1,000 single-age wave follows the 1944–50 births through the years, and 2D is no better than 1D there. The quake-interval values at these ages are artefacts.
+- **Validation (Kumamoto 2014–2020):** cell correlation 0.72/0.73 with the offset vs 0.70/0.73 without (1D/2D). The losses are in the cohorts aged 60–84.
+- **Conclusion:** the target-age results do not depend on the offset. For older ages, it is what makes one-year residuals usable.
+- **Runtime:** plain `pclm2D` is slow, about 97 minutes on 16 cores for 168 municipalities (cached in `output/6r_pclm_plain_cache.qs2`).
+
 ## 4. Study limitations (protocol §12, summarised)
 
 - **Resident-register basis.** Evacuees who did not move their 住民票 still count as living in the municipality, so real losses are underestimated. For 能登, only 2–3 in 10 people in みなし仮設 had moved their registration (金沢大学 DP96).
