@@ -1,6 +1,6 @@
 # Manifest of 人口動態統計 (e-Stat toukei 00450011) files with municipal deaths
 # by 5-year age group x sex, for the prefectures and years needed by
-# src/4r_residual_migration.ipynb.
+# src/4r_residual_migration.ipynb and src/5r_ungroup2d.ipynb.
 #
 #   Rscript src/make_deaths_manifest.R
 #
@@ -26,8 +26,11 @@ root <- if (dir.exists("dt")) "." else ".."
 out_dir <- file.path(root, "dt/raw/deaths_age")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
-years <- 2006:2020   # Tohoku counts 2006-2016, Kumamoto 2011-2021
 prefs <- c("03" = "岩手県", "04" = "宮城県", "07" = "福島県", "43" = "熊本県")
+# Years per prefecture: Tohoku counts 2006-2016 (4r/5r); Kumamoto to 2025 so
+# 5r can cover the same periods as 3r (migration 2014-2025)
+years_of <- list("03" = 2006:2020, "04" = 2006:2020, "07" = 2006:2020, "43" = 2006:2025)
+years <- sort(unique(unlist(years_of)))
 
 dl_url <- function(id) paste0("https://www.e-stat.go.jp/stat-search/file-download?statInfId=", id, "&fileKind=1")
 
@@ -63,6 +66,7 @@ is_target <- function(h, pref) {
 
 manifest <- map_dfr(years, function(y) {
   map_dfr(names(prefs), function(pc) {
+    if (!y %in% years_of[[pc]]) return(NULL)
     for (id in candidates(y, prefs[[pc]])) {
       h <- header_of(id)
       if (is_target(h, prefs[[pc]])) {

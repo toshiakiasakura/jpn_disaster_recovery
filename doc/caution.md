@@ -104,6 +104,11 @@ Things to keep in mind when using the population data in `dt/` and when reading 
   - The wave at the 1944–50 births becomes narrower but is not smaller.
   - Most of the noise is information missing inside the 5-year bands, which smoothing over time cannot restore.
 - **Fit settings:** λ for age goes to its upper bound (the national offset carries the shape). λ for time ranges from 530 to 1e5.
+- **Figure 8 (Kumamoto, laid out like 3r figure 3):** this extends the window to 2026, beyond the national single-year shape (2020). Its population is therefore split with plain `pclm2D`, without the national shape.
+  - Without it, cohort cliffs are smoothed. The residual swings by about ±40–55 per 1,000 at ages 65–79 in every period, and by +28/−35 at ages 45–54 in 2016, where the 1966 丙午 dip sits on a band edge. Read the residual there only up to about age 40.
+  - Under 40 it agrees with reported net migration (high damage, 2016, ages 20–24: −90 vs −116).
+  - Fitting without the offset is slow: 43 minutes for 45 municipalities (cached).
+- **Figures 9–10 (what the fits look like):** with the national shape, the 1947 and 1966 cliffs appear and age along cohort diagonals; without it they are smoothed. In very small municipalities (五木村, about 60 people per band), the single-year values are nearly flat within each band, so they form steps.
 
 ## 4. Study limitations (protocol §12, summarised)
 

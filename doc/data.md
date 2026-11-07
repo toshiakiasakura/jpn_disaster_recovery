@@ -8,7 +8,7 @@ All data in this project come from public statistics. This page lists where each
 |---|---|---|---|
 | Population by 5-year age band × sex, by municipality | 総務省「住民基本台帳に基づく人口、人口動態及び世帯数」市区町村別年齢（階級）別人口 (e-Stat, statsCode 00200241) | 1995–2026 | `dt/jumin_age_sex_5yr_*`, `dt/jumin_total_all_municipalities.qs2` (rebuilt here); also `3_人口パネル` in the workbook |
 | In-/out-migrants by 5-year age band × sex, by municipality | 総務省統計局「住民基本台帳人口移動報告」 (e-Stat, toukei 00200523) | 2014–2025 | `dt/idou_age_sex_5yr_long.qs2` (built here; see §4) |
-| Deaths by 5-year age band × sex, by municipality (岩手・宮城・福島・熊本) | 厚生労働省「人口動態統計」確定数, 保管統計表 都道府県編 死亡第1表 (e-Stat, toukei 00450011) | 2006–2020 | `dt/deaths_age_sex_5yr_long.qs2` (built here; see §5) |
+| Deaths by 5-year age band × sex, by municipality (岩手・宮城・福島・熊本) | 厚生労働省「人口動態統計」確定数, 保管統計表 都道府県編 死亡第1表 (e-Stat, toukei 00450011) | 2006–2020 (熊本 to 2025) | `dt/deaths_age_sex_5yr_long.qs2` (built here; see §5) |
 | National Japanese population by single year of age | 総務省統計局「人口推計」長期時系列データ 第4表 (e-Stat, toukei 00200524) | 2005–2020 (1 October) | `dt/natpop_japanese_single_year.csv` (built here; see §6) |
 | Births by municipality | Same survey, 人口動態 (annual; the year up to 1 January) | as in the workbook | `3_人口パネル` (`出生数`), `5_出生37` |
 | 全壊・半壊棟数 (fully / half-destroyed buildings) | 消防白書 H26 附属資料1 (岩手・宮城・福島); 熊本県災害対策本部 第289報; 石川県 第204報 (R7.5.13) | per disaster | `8_被害データ` (column `出典`) |
@@ -112,7 +112,7 @@ Rscript src/build_idou_age.R       # download missing files, parse, check
 
 - **Source:** 人口動態統計 (厚生労働省), 確定数 / 保管統計表 都道府県編（報告書非掲載表）/ 死亡・乳児死亡, 死亡第1表 (titled "1-2" before 2012): 死亡数，性・年齢（５歳階級）・都道府県（・保健所）・市区町村別.
 - **Coverage:** one CSV (Shift-JIS) per prefecture and year. Deaths of Japanese nationals in Japan, by residence, calendar year.
-- **Scope:** 岩手, 宮城, 福島 and 熊本, 2006–2020, i.e. what `src/4r_residual_migration.ipynb` needs. 60 files, listed in `dt/raw/deaths_age/manifest.csv`; downloaded 2026-11-07.
+- **Scope:** 岩手, 宮城 and 福島 2006–2020, and 熊本 2006–2025, i.e. what `src/4r_residual_migration.ipynb` and `src/5r_ungroup2d.ipynb` (figure 8, which follows Kumamoto to 2025) need. 65 files, listed in `dt/raw/deaths_age/manifest.csv`; downloaded 2026-11-07. From 2021 the files use the same wide layout.
 - **Ambiguous titles before 2014:** the files are titled only "1-2 03 岩手県" (2006–11) or "1 03 岩手県" (2012–13), and other tables share those titles. The manifest script therefore downloads each candidate and checks its header.
 - **Layouts:**
   - 2006–2011: long, one row per age.

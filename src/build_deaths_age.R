@@ -1,4 +1,5 @@
-# Municipal deaths by 5-year age group x sex, 2006-2020, for 岩手・宮城・福島・熊本,
+# Municipal deaths by 5-year age group x sex, for 岩手・宮城・福島 2006-2020 and
+# 熊本 2006-2025,
 # from 人口動態統計 (確定数, 保管統計表 都道府県編, 死亡第1表; e-Stat toukei 00450011).
 #
 #   Rscript src/build_deaths_age.R
@@ -159,8 +160,8 @@ if (any(pc$pref != pc$munis)) print(as.data.frame(filter(pc, pref != munis)))
 study <- readxl::read_excel("dt/analysis_original_data.xlsx", sheet = "1_市町村一覧",
                             col_types = "text") |>
   filter(災害 %in% c("東日本", "福島", "熊本"))
-cov <- expand_grid(code = study$市町村コード, year = 2006:2020) |>
-  filter(!(substr(code, 1, 2) == "43" & year < 2010)) |>
+cov <- expand_grid(code = study$市町村コード, year = 2006:2025) |>
+  filter(!(substr(code, 1, 2) == "43" & year < 2010), !(substr(code, 1, 2) != "43" & year > 2020)) |>
   anti_join(w |> filter(sex == "計") |> select(code, year), by = c("code", "year"))
 cat("Study municipality-years missing:", nrow(cov), "\n")
 if (nrow(cov)) print(head(as.data.frame(cov), 20))
