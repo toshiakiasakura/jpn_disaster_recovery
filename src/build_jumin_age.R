@@ -1,12 +1,13 @@
 # Municipal 住民基本台帳 population by 5-year age group x sex, 1995-2026,
 # for the 1,379 municipalities in dt/analysis_original_data.xlsx (3_人口パネル).
 #
-#   Rscript R/build_jumin_age.R
+#   Rscript src/build_jumin_age.R
 #
 # Inputs : dt/raw/jumin_age/manifest.csv (from make_jumin_manifest.R); the
 #          e-Stat files are downloaded into dt/raw/jumin_age/ if missing.
 # Outputs: dt/jumin_age_sex_5yr_long.qs2    long: code x year x basis x sex x age_band
 #          dt/jumin_age_sex_5yr_wide.csv   one row per code x year x basis x sex
+#          dt/jumin_total_all_municipalities.qs2  total population, every municipality
 #          dt/jumin_age_check.csv          comparison with 3_人口パネル
 #          dt/jumin_age_bandsum_mismatch.csv  rows where bands != 総数 in the source
 #
@@ -73,7 +74,9 @@ parse_year <- function(year, basis) {
       basis = basis,
       code = substr(code6, 1, 5),
       pref = str_trim(str_replace_all(pref, "　", " ")),
-      muni = str_trim(str_replace_all(muni, "　", " "))
+      # Source names carry a \037 control character and "*" markers in some
+      # years; strip them so names are stable across years.
+      muni = str_trim(str_remove_all(str_replace_all(muni, "　", " "), "[\\x1f*]"))
     ) |>
     select(-code6) |>
     pivot_longer(c(total, all_of(bands)), names_to = "age_band", values_to = "pop") |>
@@ -102,13 +105,41 @@ panel <- read_excel("dt/analysis_original_data.xlsx", sheet = "3_人口パネル
 names(panel) <- c("code", "pref", "muni", "year", "tot", "p0_14", "p20_39", "p65", "f20_39", "births")
 panel_codes <- unique(panel$code)
 
-merge_map <- read_csv(file.path("R", "merge_map.csv"), col_types = cols(.default = "c"))
+# scope == "panel": protocol §3 list, applied to the panel outputs. Rows with
+# scope == "maps" (later code changes) are only used to join old-year
+# populations onto current map boundaries, so the panel stays as published.
+merge_map_all <- read_csv(file.path("src", "merge_map.csv"), col_types = cols(.default = "c"))
+merge_map <- filter(merge_map_all, scope == "panel")
 
 merged <- raw |>
   left_join(merge_map |> select(former, survivor), by = c("code" = "former")) |>
   mutate(merged_from = if_else(is.na(survivor), NA_character_, code),
          code = coalesce(survivor, code)) |>
   select(-survivor)
+
+# Total population for every row of the source (not only the panel), for maps
+# and regional totals that also cover the surrounding prefectures. The source
+# mixes levels, so `level` says what each row is:
+#   prefecture   code ends in 000 (prefecture total)
+#   district     郡 subtotal (e.g. 本吉郡), the sum of its towns and villages
+#   ward         区 of a designated city (the city row is also present);
+#                Tokyo's 23 special wards (千代田区 …) are municipalities
+#   municipality 市町村, incl. designated-city totals
+# Sum only level == "municipality" to avoid double counting.
+all_totals <- merged |>
+  filter(age_band == "total") |>
+  group_by(code, year, basis, ref_date, sex) |>
+  summarise(pop = sum(pop), pref = first(pref), muni = first(muni),
+            .groups = "drop") |>
+  mutate(level = case_when(
+    grepl("000$", code) ~ "prefecture",
+    grepl("郡$", muni) | muni == "島しょ" ~ "district",   # 島しょ: Tokyo islands subtotal
+    grepl("^.+市.+区$", muni) ~ "ward",   # 札幌市中央区; Tokyo's 23 special wards are municipalities
+    TRUE ~ "municipality"
+  )) |>
+  select(code, pref, muni, year, basis, ref_date, sex, pop, level) |>
+  arrange(code, basis, year, sex)
+qs2::qs_save(all_totals, "dt/jumin_total_all_municipalities.qs2")
 
 out <- merged |>
   filter(code %in% panel_codes) |>

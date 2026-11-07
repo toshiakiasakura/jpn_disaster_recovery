@@ -23,11 +23,20 @@ doc_census/.estat_appid
 # Stan fits). It is ~35 KB and makes the pipeline runnable without an API key.
 !doc_census/data_raw/*.rds
 
-# Raw e-Stat downloads (rebuilt by R/build_jumin_age.R from the manifest)
+# Raw e-Stat downloads (rebuilt by src/build_jumin_age.R from the manifest)
 dt/raw/*
 !dt/raw/jumin_age/
 dt/raw/jumin_age/*
 !dt/raw/jumin_age/manifest.csv
+!dt/raw/idou_age/
+dt/raw/idou_age/*
+!dt/raw/idou_age/manifest.csv
+!dt/raw/deaths_age/
+dt/raw/deaths_age/*
+!dt/raw/deaths_age/manifest.csv
 
 # Office lock files
 ~$*
+
+# R graphics device output from Rscript runs
+Rplots.pdf

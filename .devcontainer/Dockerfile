@@ -17,8 +17,11 @@ ENV DEVCONTAINER=TRUE
 # r-languageserver backs the VS Code R extension.
 # cmake is only needed to build RcppParallel (>= 6.1.1, required by qs2) from
 # source; conda-forge has no r-qs2 and only RcppParallel 5.x.
-RUN mamba install -c conda-forge r-tidyverse=2.0.0 r-glue=1.8.0 r-lubridate=1.9.4 r-magrittr=2.0.4 r-readxl=1.4.5 r-languageserver=0.3.16 cmake -y
-RUN Rscript -e 'install.packages("remotes", repos="https://cloud.r-project.org"); remotes::install_version("scales", "1.4.0", repos="https://cloud.r-project.org"); remotes::install_version("gridExtra", "2.3", repos="https://cloud.r-project.org"); remotes::install_version("ggplot2", "4.0.1", repos="https://cloud.r-project.org"); remotes::install_version("RcppParallel", "6.2.1", repos="https://cloud.r-project.org", upgrade="never"); remotes::install_version("qs2", "0.4.0", repos="https://cloud.r-project.org", upgrade="never")'
+# ungroup (pclm, splits 5-year age bands into single years) is CRAN-only; it
+# pulls in RcppEigen, pbapply and Rdpack.
+# font-ttf-noto-cjk provides "Noto Sans CJK JP" so figures can show Japanese text.
+RUN mamba install -c conda-forge r-tidyverse=2.0.0 r-glue=1.8.0 r-lubridate=1.9.4 r-magrittr=2.0.4 r-readxl=1.4.5 r-languageserver=0.3.16 cmake font-ttf-noto-cjk=2.004 -y
+RUN Rscript -e 'install.packages("remotes", repos="https://cloud.r-project.org"); remotes::install_version("scales", "1.4.0", repos="https://cloud.r-project.org"); remotes::install_version("gridExtra", "2.3", repos="https://cloud.r-project.org"); remotes::install_version("ggplot2", "4.0.1", repos="https://cloud.r-project.org"); remotes::install_version("RcppParallel", "6.2.1", repos="https://cloud.r-project.org", upgrade="never"); remotes::install_version("qs2", "0.4.0", repos="https://cloud.r-project.org", upgrade="never"); remotes::install_version("ggnewscale", "0.5.2", repos="https://cloud.r-project.org", upgrade="never"); remotes::install_version("ungroup", "1.6.3", repos="https://cloud.r-project.org", upgrade="never")'
 
 # Install Node.js 20 and Claude Code CLI
 ARG CLAUDE_CODE_VERSION=latest

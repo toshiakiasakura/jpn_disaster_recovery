@@ -3,7 +3,7 @@
 #
 # Only this step needs an e-Stat app ID, and it is read from the environment
 # so it never lands in the repo:
-#   ESTAT_APPID=xxxx Rscript R/make_jumin_manifest.R
+#   ESTAT_APPID=xxxx Rscript src/make_jumin_manifest.R
 # The manifest it writes is all build_jumin_age.R needs; the file downloads
 # themselves do not require a key.
 
