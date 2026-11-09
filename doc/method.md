@@ -109,7 +109,8 @@ The 2016 calendar year includes about 3½ months before the April quake.
 **Change from the pre-quake baseline (figures 8–10).** These also use the published bands.
 
 - change(*b*, *t*) = net rate(*b*, *t*) − base(*b*), in points per 1,000 per year. base(*b*) is the mean of the band's 2014 and 2015 net rates, (rate<sub>2014</sub> + rate<sub>2015</sub>) / 2.
-- Figure 8 pools each 3r group; figure 10 shows the same values as line plots (one panel per group, one line per age band). Figure 9 compares each municipality with its own baseline, for ages 25–29, 40–44 and 60–64.
+- Figure 10 shows change(*b*, *t*) for each 3r group as line plots (one panel per group, one line per age band), and figure 11 shows the same values as a heatmap. Figure 9 compares each municipality with its own baseline, for every band.
+- Figure 8 is a diverging stacked bar chart. Band rates have different denominators and cannot be summed, so each segment is the band's **contribution** to the all-ages rate, 1000 · net(*b*, *t*) ÷ P<sub>all ages</sub>(*t*), minus its 2014–15 mean. Rises stack above 0 and falls below. The segments add up exactly to the change in the all-ages net rate, drawn as a dashed line (the notebook checks this).
 
 ## 6. Residual net migration (4r, 5r)
 
@@ -223,3 +224,23 @@ In the Fukushima evacuation areas, evacuees who kept their registration are not 
   - `output/3r_pclm_cache.qs2`, `output/4r_pclm_cache.qs2` and `output/5r_pclm2d_cache.qs2`. Run 4r before 5r and 6r.
   - The 5r figure-8 fits are cached separately in `output/5r_pclm_kumamoto_2011_2026.qs2`.
   - Delete a cache to refit.
+
+## 9. Census direct rates (8r)
+
+`src/8r_census_migration.ipynb` measures net migration from the census question on the address five years earlier (data: `doc/data.md` §8). It counts people **where they live**, not where they are registered, so it captures evacuees who kept their 住民票. It gives one rate per 5-year census period: 2005–10, 2010–15 (contains the Tohoku quake) and 2015–20 (contains the Kumamoto quake).
+
+**Rate** for an age band *b* (age on census day, i.e. at the end of the period):
+
+> rate(*b*) = 1000 · (in − out) ÷ (5 · P<sub>5</sub>), per 1,000 per year
+>
+> in = from other municipalities + from abroad; out = to other municipalities in Japan; P<sub>5</sub> = stayers + moves within the municipality + out = those who lived there five years earlier and are alive and in Japan on census day.
+
+- Ages 0–4 are not used. Groups are pooled by summing in, out and P<sub>5</sub>.
+- Deaths do not enter (survivors only). Emigration abroad and moves that were reversed within the period are not observed.
+
+**Unknown status.**
+- 2015 and 2020 use the official 不詳補完結果 tables.
+- 2010 is corrected proportionally: stayers, within-moves and in-migrants are scaled by *f* = residents ÷ (residents − unknown) of the municipality and age band, and out-migrants by the national *f* of the age band, because they are counted at destinations spread across Japan.
+- Applied to the raw 2015/2020 tables, this reproduces the imputed rates with a P<sub>5</sub>-weighted bias of 0.16 and 0.03 per 1,000 per year (RMSE 2.2), against 1.5 without correction. The error is concentrated at ages 15–24, where the corrected rate is too high by 3–7 per 1,000 per year.
+
+**Change from the pre-quake period:** Tohoku against 2005–10; Kumamoto against the mean of 2005–10 and 2010–15, with 2010–15 − 2005–10 shown as a placebo.

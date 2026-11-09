@@ -1,4 +1,4 @@
-# Municipal deaths by 5-year age group x sex, for 岩手・宮城・福島 2006-2020 and
+# Municipal deaths by 5-year age group x sex, for 岩手・宮城・福島 2006-2025 and
 # 熊本 2006-2025,
 # from 人口動態統計 (確定数, 保管統計表 都道府県編, 死亡第1表; e-Stat toukei 00450011).
 #

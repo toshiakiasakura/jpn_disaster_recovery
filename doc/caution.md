@@ -8,7 +8,16 @@ Things to keep in mind when using the population data in `dt/` and when reading 
   - Rebuilding the panel from e-Stat matches all 28,902 code-years exactly only under this mixed basis.
   - Growth rates across 2012→2013 therefore also pick up foreign residents being added to the count. Affected and control municipalities are hit to different degrees.
 - **Use `basis` in the new data on purpose.** `japanese` is continuous over 1995–2026. `total` exists only from 2013. Foreign residents were not on the register before July 2012, so no `total` series exists before 2013.
-- **The reference date changes in 2013.** Counts are as of 3/31 through 2012 and 1/1 from 2013, so the 2012→2013 interval is 0.75 years. Annualise rates as `(P2/P1)^(1/years) − 1` (protocol §3).
+- **The reference date changes in 2014, not 2013.** 総務省「住民基本台帳に基づく人口、人口動態及び世帯数」 changed its survey date with the 平成26年 (2014) survey.
+  - **Count date:** 3月31日現在 → 1月1日現在. The last 3/31 count is **2013-03-31**; the next count is **2014-01-01**.
+  - **Vital-statistics period:** 4月1日〜3月31日 → 1月1日〜12月31日.
+  - **Source check:** the 2013 e-Stat files used here are headed 「平成25年3月31日住民基本台帳年齢別人口（市区町村別）」, both the 日本人住民 and the 総計 tables. The 2014 files are headed 「平成26年1月1日…」.
+  - **So the 0.75-year interval is 2013-03-31 → 2014-01-01.** 2012-03-31 → 2013-03-31 is a full year. Annualise rates as `(P2/P1)^(1/years) − 1` (protocol §3).
+  - **Error in this repository (not yet fixed):**
+    - `dt/raw/jumin_age/manifest.csv`, and therefore `ref_date` in `dt/jumin_age_sex_5yr_long.qs2`, labels the 2013 counts as 2013-01-01.
+    - The protocol §3, `CLAUDE.md` and the notebooks below put the 0.75-year interval at 2012→2013.
+    - This is the likely cause of the opposite swings in the 2012 and 2013 intervals seen in every group of 5r figures 12–19. The 2012 interval is treated as 0.75 years and annualised upwards, and the 2013 interval as a full year.
+  - **2013-03-31 is also the first 総計 count** that includes foreign residents, registered from 2012-07-09.
 
 ## 2. Timing relative to each disaster
 
@@ -60,6 +69,7 @@ Things to keep in mind when using the population data in `dt/` and when reading 
 ### Year-on-year change rates (`src/2r_age_groups.ipynb`, figures 5–8)
 
 - **The 2012→2013 step is annualised.** It covers 9 months (3/31 → 1/1), so it is computed as `(P_t/P_t−1)^(1/0.75) − 1`. Without this, every series would dip artificially in 2013.
+  - ⚠ **This is wrong; see §1.** The 9-month step is 2013→2014 (2013-03-31 → 2014-01-01). The 0.75 exponent should move to the 2013→2014 step, and 2012→2013 is a full year.
 - **Merger steps are blanked.** A one-year total change above +5%, or a missing previous count, is treated as a merger. In Tohoku this hits the 2005→2006 step for 27 listed municipalities (Heisei mergers before the 2006-03-31 count, e.g. 一関市 +90%). The notebooks list them.
 - **The 2011 disaster shows in the 2012 point.** The 2011 count is from 2011-03-31, 20 days after the earthquake, so most of the loss appears in the 2011→2012 change.
 - **The 65+ jump around 2012–2014 is a cohort effect.** The baby-boom cohort born 1947–49 turned 65 then, so the jump appears in almost every municipality. Do not read it as a disaster effect.
@@ -93,6 +103,8 @@ Things to keep in mind when using the population data in `dt/` and when reading 
   - Placing them in the quake interval instead gives impossible net in-migration of about +70 per 1,000 in 大槌町 and 陸前高田市.
   - The true split differs by town. For tsunami towns, read the quake interval and year 1 together; their sum does not depend on this choice and is tabulated in the notebook.
 - **Interval timing.** Counts are on 3/31 up to 2012 and on 1/1 from 2013, while deaths are by calendar year: deaths are prorated 0.75 / 0.25 to each interval. The 2012-03-31 → 2013-01-01 interval is 0.75 years; it is annualised, and its cohort ageing is approximated.
+  - ⚠ **This is wrong; see §1.** The 2013 count is on 2013-03-31, so the short interval is 2013-03-31 → 2014-01-01. The same timing is used in 5r, 6r and 7r.
+  - To fix it: in the interval starting 2012, use deaths 0.75·D<sub>2012</sub> + 0.25·D<sub>2013</sub> with span 1. In the interval starting 2013, use 0.75·D<sub>2013</sub> with span 0.75.
 - **Fukushima evacuation areas.** Evacuees who kept their registration are not migrants in the register, so the residual understates the real population loss there.
 
 ### 2D ungrouping (`src/5r_ungroup2d.ipynb`)

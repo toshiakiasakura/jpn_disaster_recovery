@@ -14,6 +14,7 @@ All data in this project come from public statistics. This page lists where each
 | 全壊・半壊棟数 (fully / half-destroyed buildings) | 消防白書 H26 附属資料1 (岩手・宮城・福島); 熊本県災害対策本部 第289報; 石川県 第204報 (R7.5.13) | per disaster | `8_被害データ` (column `出典`) |
 | Town-office coordinates (for distance to the prefectural capital) | 国土地理院 市区町村役場データ | — | `1_市町村一覧` (`県庁所在地からの距離km`) |
 | Socio-economic indicators | 総務省「統計でみる市区町村のすがた」2013・2021・2024 (経済センサス, 国勢調査, 課税状況 etc.) | pre-disaster edition: 東日本 2013, 熊本 2021, 能登 2024 | `6_社会経済37` |
+| In-/out-migrants by 5-year age band × sex, by municipality, from the census (5年前の常住地) | 総務省統計局「国勢調査」移動人口の男女・年齢等集計 and 不詳補完結果 (e-Stat API, toukei 00200521) | census 2010, 2015, 2020 (periods 2005–10, 2010–15, 2015–20) | `dt/census_idou_age_sex_5yr_long.qs2` (built here; see §8) |
 | Municipal boundaries (maps only) | 国土交通省 国土数値情報 行政区域 (N03), 2025-01-01 vintage | 2025 | `dt/raw/n03/n03_2025_polygons.qs2` (cache, not committed) |
 
 The protocol (解析手順書 §2) also lists 復興予算 (復興庁 復興交付金配分表; 市町村決算カード) and 応急仮設 (prefectural lists of construction-type housing; みなし仮設 materials such as BRI 資料 No.216). These are not in the workbook or in `dt/`.
@@ -150,7 +151,37 @@ Rscript src/build_natpop.R
 - **Processing:** `src/fetch_n03.R` merges designated-city wards into the city code, drops holes, keeps every 4th vertex on long boundaries, and caches the result as `dt/raw/n03/n03_2025_polygons.qs2` (gitignored; downloaded 2026-11-06). The downloaded zip and GeoJSON are deleted after parsing.
 - **Rebuild:** delete the cache and run `Rscript src/fetch_n03.R`, or run `src/1r_preliminary.ipynb`, which calls it when the cache is missing.
 
-## 8. Which notebook uses what
+## 8. Census migration by age: 国勢調査 5年前の常住地
+
+- **Source:** 国勢調査 (総務省統計局, e-Stat toukei 00200521), read with the e-Stat API (`getStatsData`). The question "where did you live five years ago" gives, per municipality, census-day residents by previous residence (in-migrants) and people who lived there five years earlier by present residence (out-migrants), by sex × 5-year age.
+- **Tables** (statsDataId):
+
+| Census | Period | Raw table | Imputed (不詳補完結果) |
+|---|---|---|---|
+| 2010 | 2005-10-01 → 2010-10-01 | 0003124350 (遡及集計, 2015 table layout) | — |
+| 2015 | 2010-10-01 → 2015-10-01 | 0003169840 | 0004019720 (遡及集計 published with the 2020 census) |
+| 2020 | 2015-10-01 → 2020-10-01 | 0003447398 | 0004020973 |
+
+- **Not used:** 2000 (table 0000033411; pre-merger codes, outside the analysis window). 2005 did not ask the question. The 2025 census migration tables were not yet published (checked 2026-11-07; only 人口等基本集計 is out).
+- **Scope:** 全国, 岩手・宮城・福島・熊本 and their municipalities (designated-city wards dropped; the city row is kept). Total population including foreign residents.
+- **Unknown migration status** (移動状況「不詳」 and 5年前の常住市区町村「不詳」): 2.4% (2010), 3.7% (2015) and 5.8% (2020) of residents in the 168 study municipalities. The imputed tables have none. See `doc/method.md` §9 for how 8r handles 2010.
+- **Ages:** 0–4 … 80–84 and 85+ (2020's 85–89 / 90–94 / 95+ are summed), plus `unknown` in the raw tables. Ages 0–4 have no address five years earlier and are not used for rates.
+- **Codes:** the post-2010 changes in `src/merge_map.csv` are applied (藤沢町 → 一関市, 滝沢村 → 滝沢市, 富谷町 → 富谷市, 熊本市 43201 → 43100). Summing 藤沢町 into 一関市 for 2010 counts moves between them as both in and out; net migration is exact.
+- **Measures** (`measure`): `resident`, `stay`, `within`, `in_pref`, `in_other`, `in_abroad`, `unk_origin`, `unk_status`, `out_pref`, `out_other`; definitions are in the header of `src/build_census_idou.R`.
+- **Checks printed by the build (all pass):** resident = stay + within + in + unknown in every row; 計 = 男 + 女; the age bands sum to 総数; each prefecture's residents equal the sum of its municipalities.
+- **Downloaded:** 2026-11-07. The API responses are cached in `dt/raw/census_idou/` (gitignored, ~150 MB).
+
+| Output file | Content |
+|---|---|
+| `dt/census_idou_age_sex_5yr_long.qs2` | census_year × version (`raw` / `imputed`) × code × sex × age_band × measure; `level` = national / prefecture / municipality |
+
+Rebuild (the key is needed only to fill the cache; keep it in `~/.Renviron` as `ESTAT_APPID=…`, never in the repo):
+
+```sh
+Rscript src/build_census_idou.R   # ~5 min with an empty cache, ~1 min from the cache
+```
+
+## 9. Which notebook uses what
 
 | Notebook | Data used |
 |---|---|
@@ -160,3 +191,4 @@ Rscript src/build_natpop.R
 | `src/5r_ungroup2d.ipynb` | as 4r (reads its 1D cache `output/4r_pclm_cache.qs2`), plus 2D population fits cached in `output/5r_pclm2d_cache.qs2` |
 | `src/6r_no_offset.ipynb` | as 5r (reads the 4r and 5r caches); no-offset 1D and 2D population fits cached in `output/6r_pclm_plain_cache.qs2` |
 | `src/3r_migration_kumamoto.ipynb` | `idou_age_sex_5yr_long.qs2` (Japanese movers), `jumin_age_sex_5yr_long.qs2` (`japanese` basis), workbook sheet `1_市町村一覧` |
+| `src/8r_census_migration.ipynb` | `census_idou_age_sex_5yr_long.qs2` (2015/2020 imputed, 2010 raw), workbook sheet `1_市町村一覧` |

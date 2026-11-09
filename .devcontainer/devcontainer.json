@@ -30,7 +30,8 @@
                 "GitHub.copilot",
                 "Gruntfuggly.todo-tree",
                 "ms-azuretools.vscode-docker",
-                "anthropic.claude-code"
+                "anthropic.claude-code",
+                "yzhang.markdown-all-in-one"
             ],
             "settings": {
                 "terminal.integrated.defaultProfile.linux": "bash",

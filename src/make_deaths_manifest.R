@@ -27,9 +27,9 @@ out_dir <- file.path(root, "dt/raw/deaths_age")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
 prefs <- c("03" = "岩手県", "04" = "宮城県", "07" = "福島県", "43" = "熊本県")
-# Years per prefecture: Tohoku counts 2006-2016 (4r/5r); Kumamoto to 2025 so
-# 5r can cover the same periods as 3r (migration 2014-2025)
-years_of <- list("03" = 2006:2020, "04" = 2006:2020, "07" = 2006:2020, "43" = 2006:2025)
+# Years per prefecture: all to 2025, so 5r can cover the latest counts (2026)
+# for both disasters, and the same periods as 3r for Kumamoto (2014-2025)
+years_of <- list("03" = 2006:2025, "04" = 2006:2025, "07" = 2006:2025, "43" = 2006:2025)
 years <- sort(unique(unlist(years_of)))
 
 dl_url <- function(id) paste0("https://www.e-stat.go.jp/stat-search/file-download?statInfId=", id, "&fileKind=1")
