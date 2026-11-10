@@ -8,6 +8,12 @@ WORKDIR /workdir
 EXPOSE 8888
 
 ENV DEVCONTAINER=TRUE
+# One BLAS/OpenMP thread per R process. The notebooks fit pclm/pclm2D in
+# parallel with forked workers (parallel::mclapply); with the default
+# multi-threaded OpenBLAS each worker starts one thread per core, the cores are
+# oversubscribed and the fits run about 10x slower. Single-threaded BLAS is also
+# no slower for the small matrices of a single sequential fit.
+ENV OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1
 
 ### R package installation.
 # One solve for every conda-provided R package. The CRAN-pinned installs on the
